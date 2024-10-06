@@ -1,6 +1,6 @@
 ---
 title: "2DA PRESENTACIÓN"
-author: "CONSUELO - XARIS"
+author: "CONSUELO ESCOBAR - XARIS VALLADARES"
 date: "2024-10-05"
 output: html_document
 ---
