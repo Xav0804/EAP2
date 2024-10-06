@@ -37,7 +37,6 @@ data_igualdad_ok <- data_igualdad %>%
 **CAMBIAMOS EL NOMBRE DEL AÑO**
 
 ```{r}
-# Supongamos que data es tu dataframe
 data_corrupcion_ok <- data_corrupcion_ok %>%
   rename_with(~ gsub(" \\[YR.*\\]", "", .))  # Quitar la parte "[YR ...]" y el espacio antes
 data_educacion_superior_ok <- data_educacion_superior_ok %>%
