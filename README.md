@@ -1,6 +1,6 @@
 # DICCIONARIO - ENTREGA 2
 
-# Determinantes globales de la participación femenina en los parlamentos nacionales: Un análisis de la participación política de las mujeres.
+# Determinantes globales de la participación femenina en los parlamentos nacionales: Un análisis de la participación política de las mujeres en la última década.
 
 Investigación orientada a estudiar el porcentaje de escaños que ocupan las mujeres dentro de los parlamentos nacionales, a fin de examinar el incremento o disminución de la brecha de género en ámbitos políticos en los últimos años. 
 
