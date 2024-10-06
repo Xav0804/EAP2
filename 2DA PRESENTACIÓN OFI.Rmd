@@ -123,7 +123,7 @@ data_final <- data_final %>%
 data_final <- data_final %>%
   slice(-c(271:280, 501:510, 651:660, 751:760, 941:950, 1461:1470, 1831:1840, 2001:2010, 2091:2100))
 ```
-
+**PARA ACCEDER AL ARCHIVO EN CSV**
 ```{r}
 # Opcional: Guardar el nuevo DataFrame en un archivo CSV
 write.csv(data_final, "data_final.csv", row.names = FALSE)
