@@ -16,4 +16,4 @@ El conjunto de datos utilizado en esta investigación contiene las siguientes va
 | fuerza_laboral          | independiente | numérica | 0-100 | Tasa de participación femenina en la fuerza laboral por país |
 | estabilidad_politica    | independiente | numérica | (-100)- (100) | Estimación de la estabilidad política y ausencia de violencia por país |
 | corrupción              |  independiente | numérica | (-100)- (100) | Estimación del control de corrupción por país |                                                                                                      
-| igualdad            |  control | categórica | 1(bajo)-6(alto) | Calificación de igualdad de género por país |
+| igualdad            |  control | numérica | 1(bajo)-6(alto) | Calificación de igualdad de género por país |
