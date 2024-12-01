@@ -1,0 +1,303 @@
+---
+title: "Limpieza de datos"
+author: "Consuelo y Xaris"
+date: "2024-12-01"
+output: html_document
+---
+
+```{r}
+library(rio)
+data_escaños=import("(escaños ocupados)P_Data_Extract_From_Gender_Statistics.xlsx")
+data_PBI=import("(Crecimiento del PBI)P_Data_Extract_From_Gender_Statistics (1).xlsx")
+data_edusuperior=import("(educación superior)P_Data_Extract_From_Gender_Statistics (2).xlsx")
+data_corrupcion=import("(control de corrupción)P_Data_Extract_From_World_Development_Indicators (3).xlsx")
+data_estabilidadausencia=import("(estabilidad política y ausencia)P_Data_Extract_From_World_Development_Indicators (4).xlsx")
+data_fuerzalaboralfemenina=import("(fuerza laboral)P_Data_Extract_From_Gender_Statistics (3).xlsx")
+data_igualdad=import("(igualdad)P_Data_Extract_From_Country_Policy_and_Institutional_Assessment.xlsx")
+```
+
+## ELIMINAR FILAS INNECESARIAS COMO EL ENCABEZADO Y PIE DE PÁGINA
+
+```{r}
+library(dplyr)
+data_escanos_ok <- data_escaños %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_corrupcion_ok <- data_corrupcion %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_educacion_superior_ok <- data_edusuperior %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_estabilidad_politica_ok <- data_estabilidadausencia %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_fuerza_laboral_ok <- data_fuerzalaboralfemenina %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_PBI_ok <- data_PBI %>%
+  slice(-c(218, 219, 220, 221, 222))
+data_igualdad_ok <- data_igualdad %>%
+  slice(-c(84, 85, 86, 87, 88))
+```
+
+## CAMBIAMOS EL NOMBRE DEL AÑO, ya que es la variable mediante la cual agruparemos toda la data
+
+```{r}
+data_corrupcion_ok <- data_corrupcion_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))  # Quitar la parte "[YR ...]" y el espacio antes
+data_educacion_superior_ok <- data_educacion_superior_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+data_escanos_ok <- data_escanos_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+data_estabilidad_politica_ok <- data_estabilidad_politica_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+data_fuerza_laboral_ok <- data_fuerza_laboral_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+data_PBI_ok <- data_PBI_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+data_igualdad_ok <- data_igualdad_ok %>%
+  rename_with(~ gsub(" \\[YR.*\\]", "", .))
+```
+
+## Cambiamos los nombres de las variables y juntamos todo en una sola DATA
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Transformar a formato largo utilizando pivot_longer
+data_corrupcion_long <- data_corrupcion_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "corrupcion")
+
+data_educacion_superior_long <- data_educacion_superior_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "educacion_superior")
+
+data_escanos_long <- data_escanos_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "escanos")
+
+data_estabilidad_politica_long <- data_estabilidad_politica_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "estabilidad_politica")
+
+data_fuerza_laboral_long <- data_fuerza_laboral_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "fuerza_laboral")
+
+data_PBI_long <- data_PBI_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "PBI")
+data_igualdad_long <- data_igualdad_ok %>%
+  pivot_longer(cols = starts_with("20"), 
+               names_to = "año", 
+               values_to = "igualdad")
+
+# Unir todos los datasets utilizando full_join
+data_final <- data_corrupcion_long %>%
+  full_join(data_educacion_superior_long, by = c("Country Code", "Country Name", "año")) %>%
+  full_join(data_escanos_long, by = c("Country Code", "Country Name", "año")) %>%
+  full_join(data_estabilidad_politica_long, by = c("Country Code", "Country Name", "año")) %>%
+  full_join(data_fuerza_laboral_long, by = c("Country Code", "Country Name", "año")) %>%
+  full_join(data_igualdad_long, by = c("Country Code", "Country Name", "año")) %>%
+  full_join(data_PBI_long, by = c("Country Code", "Country Name", "año"))
+
+# Verificar el resultado
+head(data_final)
+
+```
+
+**Ya habiendo juntado la data, procedemos a eliminar filas y columnas innecesarias de la data nueva**
+
+```{r}
+# Eliminar columnas específicas
+
+data_final <- data_final %>%
+  select(-c(3, 4, 7, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23))
+
+```
+
+```{r}
+data_final <- data_final %>%
+  slice(-c(271:280, 501:510, 651:660, 751:760, 941:950, 1461:1470, 1831:1840, 2001:2010, 2091:2100))
+```
+
+```{r}
+str(data_final)
+```
+## Procedemos a Filtrar al año 2020
+
+```{r}
+data_2020 <- subset(data_final, año == 2020)
+```
+
+## Después eliminamos a países que tienen más de 2 NA's
+
+```{r}
+library(dplyr)
+
+# Lista de países a eliminar
+paises_a_eliminar <- c(
+  "American Samoa", "Aruba", "Bermuda", "Cayman Islands", "Channel Islands",
+  "Eritrea", "French Polynesia", "Greenland", "Guam", "Hong Kong SAR, China",
+  "Kosovo", "Macao SAR, China", "New Caledonia", "Sint Maarten (Dutch part)",
+  "Sudan", "Virgin Islands (U.S.)", "West Bank and Gaza", "Vietnam"
+)
+
+# Eliminar las filas donde 'Country Name' coincida con los países a eliminar
+data_2020 <- data_2020 %>%
+  filter(!`Country Name` %in% paises_a_eliminar)
+
+# Verificar el número de observaciones antes y después
+cat("Número de filas después de eliminar:", nrow(data_2020), "\n")
+
+# Verificar las primeras filas para confirmar
+head(data_2020)
+
+```
+## Procedemos a convertir los NA'S
+
+```{r}
+# Definir el vector de columnas de interés
+columns_of_interest <- c("corrupcion", "educacion_superior", "escanos", "estabilidad_politica", "fuerza_laboral", "igualdad", "PBI")
+
+```
+
+```{r}
+# Reemplazar los valores ".." por NA en las columnas de interés
+data_2020[columns_of_interest] <- lapply(data_2020[columns_of_interest], function(x) na_if(x, ".."))
+
+# Verificar que los valores fueron reemplazados
+head(data_2020)
+
+```
+
+## Ahora procedemos a convertir las variables a numéricas
+
+```{r}
+data_2020$estabilidad_politica <- as.numeric(data_2020$estabilidad_politica)
+data_2020$corrupcion <- as.numeric(data_2020$corrupcion)
+data_2020$escanos <- as.numeric(data_2020$escanos)
+data_2020$educacion_superior <- as.numeric(data_2020$educacion_superior)
+data_2020$PBI <- as.numeric(data_2020$PBI)
+data_2020$fuerza_laboral <- as.numeric(data_2020$fuerza_laboral)
+data_2020$igualdad <- as.numeric(data_2020$igualdad)
+```
+
+## Procedemos a imputar los datos
+
+##Imputación de Datos
+```{r}
+# Renombrar las columnas para eliminar los espacios
+names(data_2020) <- gsub(" ", "_", names(data_2020))
+
+# Ahora puedes seleccionar las columnas sin problema
+data_imputacion <- data_2020 %>%
+  select(Country_Name, Country_Code, año, escanos, PBI, educacion_superior, 
+         estabilidad_politica, fuerza_laboral, corrupcion, igualdad)
+
+```
+
+```{r}
+library(mice)
+imputacion <- mice(data_imputacion, m = 5, method = "pmm", maxit = 50, seed = 123)
+```
+
+```{r}
+# Completar los datos imputados (una sola versión)
+dataofi <- complete(imputacion)
+
+# Ver el resumen de los datos imputados
+summary(dataofi)
+```
+## Ahora procedemos a agruparlo por regiones 
+
+```{r}
+
+# África
+africa <- c("DZA", "AGO", "BEN", "BWA", "BFA", "BDI", "CPV", "CMR", "CAF", "TCD", "COM", "COD", 
+            "COG", "DJI", "EGY", "GNQ", "ERI", "SWZ", "ETH", "GAB", "GMB", "GHA", "GIN", "GNB", 
+            "CIV", "KEN", "LSO", "LBR", "LBY", "MDG", "MWI", "MLI", "MRT", "MUS", "MAR", "MOZ", 
+            "NAM", "NER", "NGA", "RWA", "STP", "SEN", "SYC", "SLE", "SOM", "ZAF", "SSD", "SDN", 
+            "TZA", "TGO", "TUN", "UGA", "ZMB", "ZWE")
+
+# Asia
+asia <- c("AFG", "ARM", "AZE", "BHR", "BGD", "BTN", "BRN", "KHM", "CHN", "CYP", "GEO", "IND", 
+          "IDN", "IRN", "IRQ", "ISR", "JPN", "JOR", "KAZ", "KWT", "KGZ", "LAO", "LBN", "MYS", 
+          "MDV", "MNG", "MMR", "NPL", "PRK", "OMN", "PAK", "PSE", "PHL", "QAT", "RUS", "SAU", 
+          "SGP", "KOR", "LKA", "SYR", "TWN", "TJK", "THA", "TLS", "TUR", "TKM", "ARE", "UZB", 
+          "VNM", "YEM", "HKG", "MAC", "PYF")  # Añadido French Polynesia
+
+# Europa Occidental (incluyendo el Reino Unido)
+europe_western <- c("AND", "AUT", "BEL", "FRA", "DEU", "IRL", "LUX", "MCO", "NLD", "PRT", "ESP", 
+                    "CHE", "GBR", "DNK", "FIN", "GRC", "ISL", "ITA", "LIE", "MLT", "NOR", "SMR", "SWE", "CHI", "GRL")  
+
+# Europa Oriental
+europe_eastern <- c("ALB", "BLR", "BIH", "BGR", "HRV", "CZE", "EST", "GEO", "HUN", "KAZ", "KOS", 
+                    "LVA", "LTU", "MDA", "MNE", "MKD", "POL", "ROU", "RUS", "SRB", "SVK", "SVN", "UKR", "XKX")  
+
+# América Latina y el Caribe (incluyendo México)
+latin_america_caribbean <- c("ATG", "ARG", "BRB", "BLZ", "BOL", "BRA", "CHL", "COL", "CRI", "CUB", 
+                             "DMA", "DOM", "ECU", "SLV", "GRD", "GTM", "GUY", "HTI", "HND", "JAM", 
+                             "MEX", "NIC", "PAN", "PRY", "PER", "KNA", "LCA", "VCT", "SUR", "TTO", 
+                             "URY", "VEN", "ABW", "BHS", "BMU", "CYM", "PRI", "SXM", "VIR")  # Añadidos Virgin Islands y Sint Maarten
+
+# América del Norte (sin México)
+north_america <- c("CAN", "USA")
+
+# Oceanía
+oceania <- c("AUS", "FJI", "KIR", "MHL", "FSM", "NRU", "NZL", "PLW", "PNG", "WSM", "SLB", "TON", 
+             "TUV", "VUT", "ASM", "GUM", "NCL")  # Añadidos territorios de Oceanía
+
+# Oriente Medio
+middle_east <- c("BHR", "EGY", "IRN", "IRQ", "ISR", "JOR", "KWT", "LBN", "OMN", "PSE", "QAT", 
+                 "SAU", "SYR", "ARE", "YEM")
+
+# Crear una lista de regiones con sus países
+regions <- list(
+  Africa = africa,
+  Asia = asia,
+  Europe_Western = europe_western,
+  Europe_Eastern = europe_eastern,
+  Latin_America_Caribbean = latin_america_caribbean,
+  North_America = north_america,
+  Oceania = oceania,
+  Middle_East = middle_east
+)
+
+# Asegúrate de que tu base de datos "dataofi" tenga una columna "Country Code"
+# Añadir una columna "region" a dataofi basándonos en "Country Code"
+
+dataofi$region <- sapply(dataofi$`Country_Code`, function(code) {
+  if (code %in% regions$Africa) {
+    return("Africa")
+  } else if (code %in% regions$Asia) {
+    return("Asia")
+  } else if (code %in% regions$Europe_Western) {
+    return("Europe Western")
+  } else if (code %in% regions$Europe_Eastern) {
+    return("Europe Eastern")
+  } else if (code %in% regions$Latin_America_Caribbean) {
+    return("Latin America & Caribbean")
+  } else if (code %in% regions$North_America) {
+    return("North America")
+  } else if (code %in% regions$Oceania) {
+    return("Oceania")
+  } else if (code %in% regions$Middle_East) {
+    return("Middle East")
+  } else {
+    return(NA)  # Si el código no se encuentra en ninguna región
+  }
+})
+
+# Verificar el resultado
+head(dataofi)
+```
+```{r}
+# Guardar el dataframe actualizado como un archivo CSV
+write.csv(dataofi, file = "dataoficial.csv", row.names = FALSE)
+```
+
