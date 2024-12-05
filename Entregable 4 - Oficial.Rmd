@@ -1,5 +1,5 @@
 ---
-title: "Entregable 3 - Consuelo Escobar y Xaris Valladares"
+title: "Presentación Final - Consuelo Escobar y Xaris Valladares"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
